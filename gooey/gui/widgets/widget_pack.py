@@ -9,6 +9,7 @@ from gooey.gui.util.filedrop import FileDrop
 from gooey.gui.widgets.calender_dialog import CalendarDlg
 
 
+
 class WidgetPack(object):
   """
   Interface specifying the contract to which
@@ -92,9 +93,11 @@ class BaseMultiFileChooser(BaseFileChooser):
   def get_path(self, dlg):
     return os.pathsep.join(dlg.GetPaths())
 
+
 class MultiFileSaverPayload(BaseMultiFileChooser):
   def __init__(self, *args, **kwargs):
     BaseMultiFileChooser.__init__(self, build_dialog(wx.FD_MULTIPLE, False))
+
 
 class MultiDirChooserPayload(BaseMultiFileChooser):
   class MyMultiDirChooser(MDD.MultiDirDialog):
@@ -150,6 +153,7 @@ class TextAreaPayload(WidgetPack):
   def get_value(self):
     return self.widget.GetValue()
 
+
 class DropdownPayload(WidgetPack):
   default_value = 'Select Option'
 
@@ -175,6 +179,32 @@ class DropdownPayload(WidgetPack):
     self.widget.SetValue(text)
 
 
+class ListboxPayload(WidgetPack):
+  default_value = 'Select Option'
+
+  def __init__(self, no_quoting=False):
+    self.widget = None
+    self.option_string = None
+    self.no_quoting = no_quoting
+
+  def build(self, parent, data, choices=None):
+    self.widget = wx.ListBox(
+      parent=parent,
+      choices=choices,
+      size=(-1,60),
+      style=wx.LB_MULTIPLE
+    )
+    return self.widget
+
+  def get_value(self):
+    return [self.widget.GetString(index)
+            for index in self.widget.GetSelections()]
+
+  def set_value(self, strings):
+    for s in strings:
+      self.widget.SetStringSelection(s)
+
+
 class CounterPayload(WidgetPack):
   def __init__(self):
     self.widget = None
@@ -184,7 +214,7 @@ class CounterPayload(WidgetPack):
       parent=parent,
       id=-1,
       value='',
-      choices=map(str, range(1, 11)),
+      choices=list(map(str, range(1, 11))),
       style=wx.CB_DROPDOWN
     )
     return self.widget
@@ -192,19 +222,41 @@ class CounterPayload(WidgetPack):
   def get_value(self):
     return self.widget.GetValue()
 
+
 class DirDialog(wx.DirDialog):
   def __init__(self, parent, *args, **kwargs):
     wx.DirDialog.__init__(self, parent, 'Select Directory', style=wx.DD_DEFAULT_STYLE)
 
 
+class PasswordInputPayload(WidgetPack):
+  def __init__(self, no_quoting=False):
+    self.widget = None
+    self.option_string = None
+    self.no_quoting = no_quoting
+
+  def build(self, parent, data, choices=None):
+    self.widget = wx.TextCtrl(parent, style=wx.TE_PASSWORD)
+    dt = FileDrop(self.widget)
+    self.widget.SetDropTarget(dt)
+    self.widget.SetMinSize((0, -1))
+    self.widget.SetDoubleBuffered(True)
+    self.widget.AppendText('')
+    return self.widget
+
+  def get_value(self):
+    return self.widget.GetValue()
+
+
 def safe_default(data, default):
   return ''
+
 
 def build_dialog(style, exist_constraint=True, **kwargs):
   if exist_constraint:
     return lambda panel: wx.FileDialog(panel, style=style | wx.FD_FILE_MUST_EXIST, **kwargs)
   else:
     return lambda panel: wx.FileDialog(panel, style=style, **kwargs)
+
 
 def build_subclass(subclass, dialog):
   return type(subclass, (BaseFileChooser,), {'dialog': dialog})

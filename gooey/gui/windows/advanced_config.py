@@ -7,7 +7,11 @@ Managed the internal layout for configuration options
 
 import wx
 from wx.lib.scrolledpanel import ScrolledPanel
-from itertools import chain, izip_longest
+from itertools import chain
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 from collections import OrderedDict
 
 from gooey.gui.util import wx_util
@@ -27,6 +31,8 @@ class WidgetContainer(ScrolledPanel):
       self.SetupScrolling(scroll_x=False, scrollToTop=False)
     else:
       wx.Panel.__init__(self, parent, *args, **kwargs)
+
+    self.use_tabs = use_tabs
     self.section_name = section_name
     self.title = None
     self.widgets = []
@@ -42,7 +48,7 @@ class WidgetContainer(ScrolledPanel):
       self.container.AddSpacer(30)
 
     if self.widgets:
-      if not self.Parent.use_tabs:
+      if not self.use_tabs:
         self.container.Add(wx_util.h1(self, self.section_name), 0, wx.LEFT | wx.RIGHT, PADDING)
         self.container.AddSpacer(5)
       self.container.Add(wx_util.horizontal_rule(self), *STD_LAYOUT)
@@ -76,19 +82,19 @@ class WidgetContainer(ScrolledPanel):
   def chunk(self, iterable, n, fillvalue=None):
     "itertools recipe: Collect data into fixed-length chunks or blocks"
     args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
+    return zip_longest(fillvalue=fillvalue, *args)
 
   def __iter__(self):
     return iter(self.widgets)
 
 
-class ConfigPanel(ScrolledPanel, wx.Notebook):
+class ConfigPanel(ScrolledPanel):
 
   def __init__(self, parent, req_cols=1, opt_cols=3, title=None, use_tabs=True, **kwargs):
+    ScrolledPanel.__init__(self, parent, **kwargs)
     if use_tabs:
-      wx.Notebook.__init__(self, parent, **kwargs)
+      self.nb = wx.Notebook(self, **kwargs)
     else:
-      ScrolledPanel.__init__(self, parent, **kwargs)
       self.SetupScrolling(scroll_x=False, scrollToTop=False)
 
     self.SetDoubleBuffered(True)
@@ -102,9 +108,11 @@ class ConfigPanel(ScrolledPanel, wx.Notebook):
     self.Bind(wx.EVT_SIZE, self.OnResize)
 
   def CreateSection(self, name):
-    self.section[name] = WidgetContainer(self, i18n._(name), self.use_tabs)
     if self.use_tabs:
-      self.AddPage(self.section[name], name)
+      self.section[name] = WidgetContainer(self.nb, i18n._(name), self.use_tabs)
+      self.nb.AddPage(self.section[name], name)
+    else:
+      self.section[name] = WidgetContainer(self, i18n._(name), self.use_tabs)
 
   def DeleteSection(self, name):
     del self.section[name]
@@ -118,13 +126,18 @@ class ConfigPanel(ScrolledPanel, wx.Notebook):
     return self.section[name]
 
   def _do_layout(self):
-    STD_LAYOUT = (0, wx.LEFT | wx.RIGHT | wx.EXPAND, PADDING)
+    STD_LAYOUT = (1 if self.use_tabs else 0, wx.LEFT | wx.RIGHT | wx.EXPAND, PADDING)
 
-    container = wx.BoxSizer(wx.VERTICAL)
-    container.AddSpacer(15)
+    if self.use_tabs:
+      container = wx.BoxSizer(wx.VERTICAL)
+      container.AddSpacer(15)
+      container.Add(self.nb, *STD_LAYOUT)
+    else:
+      container = wx.BoxSizer(wx.VERTICAL)
+      container.AddSpacer(15)
+      for section in self.section.keys():
+        container.Add(self.section[section], *STD_LAYOUT)
 
-    for section in self.section.keys():
-      container.Add(self.section[section], *STD_LAYOUT)
     self.SetSizer(container)
 
   def OnResize(self, evt):

@@ -1,10 +1,12 @@
 Gooey (Beta)
 =====  
-Turn (almost) any Python Console Program into a GUI application with one line  
+Turn (almost) any Python 2 or 3 Console Program into a GUI application with one line
 
 <p align="center">
     <img src="https://cloud.githubusercontent.com/assets/1408720/7904381/f54f97f6-07c5-11e5-9bcb-c3c102920769.png" />
 </p>
+
+# Gooey now supports Python 3!!
 
 
 Table of Contents
@@ -38,10 +40,7 @@ Table of Contents
 
 
 
- 
-
-
-----------   
+----------
 
 
 ### Artist Wanted!
@@ -53,18 +52,15 @@ Drop me an <a href="mailto:audionautic@gmail.com">email</a> if you want to help 
 ----------------  
 
 
-
-
 ## Quick Start
 
 
 ### Installation instructions
 
 
-The easiest way to install Gooey is via `pip` 
+The easiest way to install Gooey is via `pip`
 
     pip install Gooey 
-
 
 Alternatively, you can install Gooey by cloning the project to your local directory
 
@@ -74,7 +70,9 @@ run `setup.py`
 
     python setup.py install
     
-After Gooey is installed, make sure [wxPython](http://www.wxpython.org/download.php) is installed on your machine as well. Unfortanately, this cannot be done from the CLI and should be manually downloaded from the [wxPython website](http://www.wxpython.org/download.php).
+**NOTE:** Python 2 users must manually install WxPython! Unfortunately, this cannot be done as part of the pip installation and should be manually downloaded from the [wxPython website](http://www.wxpython.org/download.php).
+
+
 
 ### Usage  
 
@@ -93,6 +91,7 @@ Different styling and functionality can be configured by passing arguments into 
     @Gooey(advanced=Boolean,          # toggle whether to show advanced config or not 
            language=language_string,  # Translations configurable via json
            show_config=True,          # skip config screens all together
+           target=executable_cmd,     # Explicitly set the subprocess executable arguments
            program_name='name',       # Defaults to script name
            program_description,       # Defaults to ArgParse Description
            default_size=(610, 530),   # starting size of the GUI
@@ -205,7 +204,11 @@ However, by dropping in `GooeyParser` and supplying a `widget` name, you can dis
 | Widget         |           Example            | 
 |----------------|------------------------------| 
 |  DirChooser/FileChooser   | <p align="center"><img src="https://cloud.githubusercontent.com/assets/1408720/7904377/f5483b28-07c5-11e5-9d01-1935635fc22d.gif" width="400"></p> | 
-|  DateChooser   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <p align="center"><img src="https://cloud.githubusercontent.com/assets/1408720/7904376/f544756a-07c5-11e5-86d6-862ac146ad35.gif" width="400"></p> |  
+|  DateChooser   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <p align="center"><img src="https://cloud.githubusercontent.com/assets/1408720/7904376/f544756a-07c5-11e5-86d6-862ac146ad35.gif" width="400"></p> |
+| PasswordField | <p align="center"><img src="https://user-images.githubusercontent.com/1408720/28953722-eae72cca-788e-11e7-8fa1-9a1ef332a053.png" width="400"></p> |
+| Listbox | ![image](https://user-images.githubusercontent.com/1408720/31590191-fadd06f2-b1c0-11e7-9a49-7cbf0c6d33d1.png) |
+
+
  
   
 Internationalization
@@ -247,6 +250,7 @@ Just about everything in Gooey can be customized by passing arguments to the dec
 | advanced | Toggles whether to show the 'full' configuration screen, or a simplified version | 
 | show_config | Skips the configuration all together and runs the program immediately |
 | language | Tells Gooey which language set to load from the `gooey/languages` directory.|
+| target | Tells Gooey how to re-invoke itself. By default Gooey will find python, but this allows you to specify the program (and arguments if supplied).|
 |program_name | The name displayed in the title bar of the GUI window. If not supplied, the title defaults to the script name pulled from `sys.argv[0]`. |
 | program_description | Sets the text displayed in the top panel of the `Settings` screen. Defaults to the description pulled from `ArgumentParser`. |
 | default_size | Initial size of the window | 

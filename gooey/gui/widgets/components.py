@@ -51,10 +51,11 @@ class BaseGuiComponent(object):
     vertical_container.Add(core_widget_set, 0, wx.EXPAND)
     self.panel.SetSizer(vertical_container)
 
+    self.panel.Bind(wx.EVT_SIZE, self.onResize)
     return self.panel
 
   def bind(self, *args, **kwargs):
-    print self.widget_pack.widget.Bind(*args, **kwargs)
+    print(self.widget_pack.widget.Bind(*args, **kwargs))
 
   def get_title(self):
     return self.title.GetLabel()
@@ -104,7 +105,7 @@ class BaseGuiComponent(object):
 
   def set_value(self, val):
     if val:
-      self.widget_pack.widget.SetValue(unicode(val))
+      self.widget_pack.widget.SetValue(str(val))
 
   def __repr__(self):
     return self.__class__.__name__
@@ -167,6 +168,8 @@ class RadioGroup(object):
 
     self.do_layout(parent, title, msg)
 
+    self.selected_button = None
+
   def do_layout(self, parent, titles, msgs):
     self.panel = wx.Panel(parent)
 
@@ -192,13 +195,20 @@ class RadioGroup(object):
 
     self.panel.SetSizer(vertical_container)
     self.panel.Bind(wx.EVT_SIZE, self.onResize)
-    self.panel.Bind(wx.EVT_RADIOBUTTON, self.showz)
+
+    for button in self.radio_buttons:
+      button.Bind(wx.EVT_LEFT_DOWN, self.handle_selection)
+
     return self.panel
 
-  def showz(self, evt):
-    print evt
-    for i in self.radio_buttons:
-      print i.GetValue()
+  def handle_selection(self, event):
+    if event.EventObject.Id == getattr(self.selected_button, 'Id', None):
+      # if it is already selected, manually deselect it
+      self.selected_button.SetValue(False)
+      self.selected_button = None
+    else:
+      event.Skip()
+      self.selected_button = event.EventObject
 
   def onResize(self, evt):
     msg = self.help_msgs[0]
@@ -217,10 +227,20 @@ class RadioGroup(object):
     pass
 
 
+class Listbox(BaseGuiComponent):
+  widget_class = widget_pack.ListboxPayload
+
+  def set_value(self, val):
+    if val:
+      self.widget_pack.set_value(val)
+
 
 def build_subclass(name, widget_class):
   # this seemed faster than typing class X a bunch
   return type(name, (BaseGuiComponent,), {'widget_class': widget_class})
+
+
+
 
 
 FileChooser       = build_subclass('FileChooser', widget_pack.FileChooserPayload)
@@ -234,4 +254,4 @@ CommandField      = build_subclass('CommandField', widget_pack.TextInputPayload(
 Dropdown          = build_subclass('Dropdown', widget_pack.DropdownPayload)
 Counter           = build_subclass('Counter', widget_pack.CounterPayload)
 MultiDirChooser   = build_subclass('MultiDirChooser', widget_pack.MultiDirChooserPayload)
-
+PasswordField     = build_subclass('PasswordField', widget_pack.PasswordInputPayload)

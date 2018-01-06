@@ -62,7 +62,11 @@ class MyWidget(object):
       arg = str(self.commands[0]).replace('-', '')
       repeated_args = arg * int(self._value)
       return '-' + repeated_args
-
+    if self.type == 'Listbox':
+      if self.commands and self._value:
+        return u'{} {}'.format(self.commands[0], ' '.join(map(quote, self._value)))
+      else:
+        return ' '.join(map(quote, self._value)) if self._value else ''
     if self.type == 'Dropdown':
       if self._value == 'Select Option':
         return None
@@ -168,7 +172,7 @@ class MyModel(object):
 
     self.use_argparse_groups = self.build_spec['use_argparse_groups']
     self.argument_groups = self.wrap(self.build_spec.get('widgets', {}))
-    self.active_group = iter(self.argument_groups).next()
+    self.active_group = next(iter(self.argument_groups))
 
     self.use_tabs = self.build_spec['use_tabs']
 
@@ -267,11 +271,11 @@ class MyModel(object):
     required_args, optional_args  = self.partition(widget_list, is_required)
     if self.build_spec['group_by_type']:
       optional_args = chain(*self.partition(optional_args, not_checkbox))
-    return map(self.to_object, required_args), map(self.to_object, optional_args)
+    return list(map(self.to_object, required_args)), list(map(self.to_object, optional_args))
 
   @staticmethod
   def partition(collection, condition):
-    return filter(condition, collection), filter(lambda x: not condition(x), collection)
+    return list(filter(condition, collection)), list(filter(lambda x: not condition(x), collection))
 
   def to_object(self, data):
     details = data['data']

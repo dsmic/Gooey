@@ -5,10 +5,10 @@ Created on Dec 23, 2013
 '''
 
 import wx
-try:
-    import wx.animate
-except ImportError:
-    import wx.adv
+#try:
+    #import wx.animate
+#except ImportError:
+    #import wx.adv
 
 from gooey.gui.pubsub import pub
 
@@ -108,9 +108,3 @@ class Footer(wx.Panel):
 
   def _load_image(self, img_path, height=70):
     return imageutil.resize_bitmap(self, imageutil._load_image(img_path), height)
-
-
-
-
-
-

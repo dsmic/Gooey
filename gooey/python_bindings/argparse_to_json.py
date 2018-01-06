@@ -31,7 +31,9 @@ VALID_WIDGETS = (
   'RadioGroup',
   'CheckBox',
   'MultiDirChooser',
-  'Textarea'
+  'Textarea',
+  'PasswordField',
+  'Listbox'
 )
 
 
@@ -129,7 +131,7 @@ def categorize(actions, cmd_args, widget_dict, required=False):
     elif is_counter(action):
       _json = as_json(action, _get_widget(action) or 'Counter', required)
       # pre-fill the 'counter' dropdown
-      _json['data']['choices'] = map(str, range(1, 11))
+      _json['data']['choices'] = list(map(str, range(1, 11)))
       yield _json
     else:
       raise UnknownWidgetType(action)
@@ -147,16 +149,16 @@ def is_required(action):
   return not isinstance(action, _SubParsersAction) and (action.required == True and action.nargs not in ['*', '?'])
 
 def has_required(actions):
-  return filter(None, filter(is_required, actions))
+  return list(filter(None, list(filter(is_required, actions))))
 
 def is_subparser(action):
   return isinstance(action,_SubParsersAction)
 
 def has_subparsers(actions):
-    return filter(is_subparser, actions)
+    return list(filter(is_subparser, actions))
 
 def get_subparser(actions):
-    return filter(is_subparser, actions)[0]
+    return list(filter(is_subparser, actions))[0]
 
 def is_optional(action):
   '''
@@ -185,7 +187,7 @@ def is_standard(action):
 def is_flag(action):
   """ _actions which are either storeconst, store_bool, etc.. """
   action_types = [_StoreTrueAction, _StoreFalseAction, _StoreConstAction]
-  return any(map(lambda Action: isinstance(action, Action), action_types))
+  return any(list(map(lambda Action: isinstance(action, Action), action_types)))
 
 def is_counter(action):
   """ _actions which are of type _CountAction """
