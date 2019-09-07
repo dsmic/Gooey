@@ -99,7 +99,7 @@ def process(parser, cmd_args, widget_dict, use_argparse_groups):
 
     return list(categorize(required_actions, cmd_args, widget_dict, required=True)) + \
            list(categorize(optional_actions, cmd_args, widget_dict)) + \
-           map(build_radio_group, mutually_exclusive_groups)
+           list(map(build_radio_group, mutually_exclusive_groups))
 
 def process_action_group(action_group, cmd_args, widget_dict):
   mutually_exclusive_groups = [
